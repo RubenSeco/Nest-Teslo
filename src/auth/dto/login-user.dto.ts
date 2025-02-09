@@ -3,6 +3,9 @@ import { IsEmail, IsString, Matches, MaxLength, MinLength } from "class-validato
 export class LoginUserDto {
 
 
+  // @IsString()
+  // @IsUUID()
+  // id: string;
 
   @IsString()
   @MinLength(6)

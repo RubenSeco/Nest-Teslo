@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +13,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    private readonly jwtService: JwtService
 
   ) { }
 
@@ -29,13 +33,24 @@ export class AuthService {
       );
       await this.userRepository.save(user);
       delete user.password;
-      return user;
-      // TODO: Retornar el JWT de acceso
+
+      return {
+        ...user,
+        token: this.getJwtToken({ id: user.id })
+      };
 
     } catch (error) {
 
       this.handleError(error);
     }
+  }
+
+  private getJwtToken(payload: JwtPayload) {
+
+    const token = this.jwtService.sign(payload);
+    return token;
+
+
   }
 
   private handleError(error: any): never {
@@ -49,11 +64,11 @@ export class AuthService {
 
   async login(loginUserDto: LoginUserDto) {
 
-    const { email, password } = loginUserDto;
+    const { password, email } = loginUserDto;
 
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { email: true, password: true }
+      select: { email: true, password: true, id: true }
     });
 
     if (!user) {
@@ -64,10 +79,21 @@ export class AuthService {
       throw new UnauthorizedException("Invalid credentials (password)");
     }
 
-    return user;
+    return {
+      ...user,
+      token: this.getJwtToken({ id: user.id })
+    };
 
-    // TODO: Retornar el JWT de acceso  
   }
 
+  async checkAuthStatus(user: User) {
+
+    return {
+      ...user,
+      token: this.getJwtToken({ id: user.id })
+    };
+
+
+  }
 
 }

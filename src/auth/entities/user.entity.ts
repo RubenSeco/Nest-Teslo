@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Product } from '../../products/entities/product.entity';
 
 @Entity({ name: "users" })
 export class User {
@@ -18,7 +19,24 @@ export class User {
   @Column({ type: "text" })
   fullName: string;
 
-  @Column({ type: "text", array: true, default: ["user"] })
+  @Column({ type: "text", array: true })
   roles: string[];
+
+  @OneToMany(
+    () => Product,
+    (product) => product.user,
+
+  )
+  product: Product;
+
+  @BeforeInsert()
+  emailToLowerCase() {
+    this.email = this.email.toLowerCase().trim();
+  }
+
+  @BeforeUpdate()
+  emailToLowerCaseOnUpdate() {
+    this.email = this.email.toLowerCase().trim();
+  }
 
 }
