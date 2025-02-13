@@ -6,8 +6,9 @@ import { GetUser } from './decorators/get-user.decorator';
 import { User } from './entities/user.entity';
 import { RawHeaders } from './decorators/get-rawHeaders.decorator';
 import { Auth } from './decorators/auth.decorator';
+import { ApiTags } from '@nestjs/swagger';
 // import { validRoles } from './interfaces';
-
+@ApiTags("Auth")
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
@@ -18,7 +19,7 @@ export class AuthController {
   }
 
   @Post("login")
-  @Auth()
+  // @Auth()
   loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
   }

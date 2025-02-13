@@ -8,11 +8,17 @@ import { FilesModule } from './files/files.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
+import { MessageWsModule } from './message-ws/message-ws.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
+
+      ssl: process.env.STAGE === "prod" ? true : false,
+      extra: {
+        ssl: process.env.STAGE === "prod" ? { rejectUnauthorized: false } : null,
+      },
 
       type: "postgres",
       host: process.env.DB_HOST,
@@ -29,7 +35,8 @@ import { AuthModule } from './auth/auth.module';
     SeedModule,
     FilesModule,
     ServeStaticModule.forRoot({ rootPath: join(__dirname, "..", "public") }),
-    AuthModule, // Para servir archivos estáticos
+    AuthModule,
+    MessageWsModule, // Para servir archivos estáticos
   ],
 })
 export class AppModule { }
